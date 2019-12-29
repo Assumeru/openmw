@@ -25,6 +25,7 @@ namespace MWScript
             mutable MWWorld::Ptr mReference;
 
             std::string mTargetId;
+            int mActorId = -1;
 
             /// If \a id is empty, a reference the script is run from is returned or in case
             /// of a non-local script the reference derived from the target ID.
@@ -48,8 +49,9 @@ namespace MWScript
 
         public:
 
-            InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference,
-                const std::string& targetId = "");
+            InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference);
+
+            InterpreterContext (MWScript::Locals *locals, const std::string& targetId, int actorId);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
             virtual int getLocalShort (int index) const;

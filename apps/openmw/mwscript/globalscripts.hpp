@@ -8,6 +8,8 @@
 
 #include "locals.hpp"
 
+#include "../mwworld/ptr.hpp"
+
 namespace ESM
 {
     class ESMWriter;
@@ -31,6 +33,7 @@ namespace MWScript
         bool mRunning;
         Locals mLocals;
         std::string mId; // ID used to start targeted script (empty if not a targeted script)
+        int mActorId = -1;
 
         GlobalScriptDesc();
     };
@@ -44,7 +47,7 @@ namespace MWScript
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void addScript (const std::string& name, const std::string& targetId = "");
+            void addScript (const std::string& name, const MWWorld::Ptr& target = MWWorld::Ptr());
 
             void removeScript (const std::string& name);
 

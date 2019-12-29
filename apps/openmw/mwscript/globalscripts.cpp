@@ -5,10 +5,13 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/globalscript.hpp>
 
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
 
@@ -21,10 +24,19 @@ namespace MWScript
     : mStore (store)
     {}
 
-    void GlobalScripts::addScript (const std::string& name, const std::string& targetId)
+    void GlobalScripts::addScript (const std::string& name, const MWWorld::Ptr& target)
     {
         std::map<std::string, GlobalScriptDesc>::iterator iter =
             mScripts.find (::Misc::StringUtils::lowerCase (name));
+
+        std::string targetId;
+        int actorId = -1;
+        if (!target.isEmpty())
+        {
+            targetId = target.getCellRef().getRefId();
+            if (target.getClass().isActor())
+                actorId = target.getClass().getCreatureStats(target).getActorId();
+        }
 
         if (iter==mScripts.end())
         {
@@ -34,6 +46,7 @@ namespace MWScript
                 desc.mRunning = true;
                 desc.mLocals.configure (*script);
                 desc.mId = targetId;
+                desc.mActorId = actorId;
 
                 mScripts.insert (std::make_pair (name, desc));
             }
@@ -42,6 +55,7 @@ namespace MWScript
         {
             iter->second.mRunning = true;
             iter->second.mId = targetId;
+            iter->second.mActorId = actorId;
         }
     }
 
@@ -75,7 +89,7 @@ namespace MWScript
                 MWWorld::Ptr ptr;
 
                 MWScript::InterpreterContext interpreterContext (
-                    &iter->second.mLocals, MWWorld::Ptr(), iter->second.mId);
+                    &iter->second.mLocals, iter->second.mId, iter->second.mActorId);
 
                 MWBase::Environment::get().getScriptManager()->run (iter->first, interpreterContext);
             }
@@ -137,6 +151,7 @@ namespace MWScript
             script.mRunning = iter->second.mRunning ? 1 : 0;
 
             script.mTargetId = iter->second.mId;
+            script.mActorId = iter->second.mActorId;
 
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
@@ -181,6 +196,7 @@ namespace MWScript
             iter->second.mRunning = script.mRunning!=0;
             iter->second.mLocals.read (script.mLocals, script.mId);
             iter->second.mId = script.mTargetId;
+            iter->second.mActorId = script.mActorId;
 
             return true;
         }
