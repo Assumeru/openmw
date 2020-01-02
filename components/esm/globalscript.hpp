@@ -1,7 +1,10 @@
 #ifndef OPENMW_ESM_GLOBALSCRIPT_H
 #define OPENMW_ESM_GLOBALSCRIPT_H
 
+#include <boost/variant/variant.hpp>
+
 #include "locals.hpp"
+#include "cellref.hpp"
 
 namespace ESM
 {
@@ -15,8 +18,7 @@ namespace ESM
         std::string mId; /// \note must be lowercase
         Locals mLocals;
         int mRunning;
-        std::string mTargetId; // for targeted scripts
-        int mActorId;
+        boost::variant<RefNum, std::string> mTarget; // for targeted scripts
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

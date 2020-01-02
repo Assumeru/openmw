@@ -3,6 +3,8 @@
 
 #include <components/interpreter/context.hpp>
 
+#include "globalscripts.hpp"
+
 #include "../mwworld/ptr.hpp"
 
 namespace MWSound
@@ -23,9 +25,7 @@ namespace MWScript
     {
             Locals *mLocals;
             mutable MWWorld::Ptr mReference;
-
-            std::string mTargetId;
-            int mActorId = -1;
+            GlobalScriptDesc *mGlobalScriptDesc;
 
             /// If \a id is empty, a reference the script is run from is returned or in case
             /// of a non-local script the reference derived from the target ID.
@@ -48,10 +48,9 @@ namespace MWScript
                 char type) const;
 
         public:
+            InterpreterContext (GlobalScriptDesc& globalScriptDesc);
 
             InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference);
-
-            InterpreterContext (MWScript::Locals *locals, const std::string& targetId, int actorId);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
             virtual int getLocalShort (int index) const;
@@ -155,8 +154,6 @@ namespace MWScript
 
             void updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
             ///< Update the Ptr stored in mReference, if there is one stored there. Should be called after the reference has been moved to a new cell.
-
-            virtual std::string getTargetId() const;
     };
 }
 

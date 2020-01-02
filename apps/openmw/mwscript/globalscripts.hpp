@@ -1,6 +1,8 @@
 #ifndef GAME_SCRIPT_GLOBALSCRIPTS_H
 #define GAME_SCRIPT_GLOBALSCRIPTS_H
 
+#include <boost/variant/variant.hpp>
+
 #include <string>
 #include <map>
 
@@ -14,6 +16,7 @@ namespace ESM
 {
     class ESMWriter;
     class ESMReader;
+    class RefNum;
 }
 
 namespace Loading
@@ -32,10 +35,13 @@ namespace MWScript
     {
         bool mRunning;
         Locals mLocals;
-        std::string mId; // ID used to start targeted script (empty if not a targeted script)
-        int mActorId = -1;
+        boost::variant<MWWorld::Ptr, ESM::RefNum, std::string> mTarget; // Used to start targeted script
 
         GlobalScriptDesc();
+
+        const MWWorld::Ptr* getPtrIfPresent() const;
+
+        MWWorld::Ptr getPtr();
     };
 
     class GlobalScripts

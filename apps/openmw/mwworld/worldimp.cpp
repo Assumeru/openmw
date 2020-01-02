@@ -11,6 +11,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/cellref.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -748,6 +749,11 @@ namespace MWWorld
             return getPlayerPtr();
         // Now search cells
         return mWorldScene->searchPtrViaActorId (actorId);
+    }
+
+    Ptr World::searchPtrViaRefNum (const ESM::RefNum& refNum)
+    {
+        return mCells.getPtr (refNum);
     }
 
     struct FindContainerVisitor

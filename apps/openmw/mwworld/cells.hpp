@@ -13,6 +13,7 @@ namespace ESM
     class ESMWriter;
     struct CellId;
     struct Cell;
+    struct RefNum;
 }
 
 namespace Loading
@@ -61,6 +62,8 @@ namespace MWWorld
 
             /// @note name must be lower case
             Ptr getPtr (const std::string& name);
+
+            Ptr getPtr(const ESM::RefNum& refNum);
 
             void rest (double hours);
             void recharge (float duration);

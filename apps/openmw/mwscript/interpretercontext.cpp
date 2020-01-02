@@ -37,13 +37,8 @@ namespace MWScript
         }
         else
         {
-            if (mReference.isEmpty() && !mTargetId.empty())
-            {
-                if (mActorId == -1)
-                    mReference = MWBase::Environment::get().getWorld()->searchPtr(mTargetId, false);
-                else
-                    mReference = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
-            }
+            if (mReference.isEmpty() && mGlobalScriptDesc)
+                mReference = mGlobalScriptDesc->getPtr();
 
             if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
@@ -61,13 +56,8 @@ namespace MWScript
         }
         else
         {
-            if (mReference.isEmpty() && !mTargetId.empty())
-            {
-                if (mActorId == -1)
-                    mReference = MWBase::Environment::get().getWorld()->searchPtr(mTargetId, false);
-                else
-                    mReference = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
-            }
+            if (mReference.isEmpty() && mGlobalScriptDesc)
+                mReference = mGlobalScriptDesc->getPtr();
 
             if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
@@ -142,26 +132,19 @@ namespace MWScript
         throw std::runtime_error (stream.str().c_str());
     }
 
-
-    InterpreterContext::InterpreterContext (
-        MWScript::Locals *locals, const MWWorld::Ptr& reference)
+    InterpreterContext::InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference)
     : mLocals (locals), mReference (reference)
-    {
-        // If we run on a reference (local script, dialogue script or console with object
-        // selected), store the ID of that reference store it so it can be inherited by
-        // targeted scripts started from this one.
-        if (!reference.isEmpty())
-        {
-            mTargetId = reference.getCellRef().getRefId();
-            if (reference.getClass().isActor())
-                mActorId = reference.getClass().getCreatureStats(reference).getActorId();
-        }
-    }
-
-    InterpreterContext::InterpreterContext(
-        MWScript::Locals *locals, const std::string& targetId, int actorId)
-    : mLocals(locals), mTargetId(targetId), mActorId(actorId)
     {}
+
+    InterpreterContext::InterpreterContext (GlobalScriptDesc& globalScriptDesc)
+    : mLocals (&globalScriptDesc.mLocals)
+    {
+        const MWWorld::Ptr* ptr = globalScriptDesc.getPtrIfPresent();
+        if (ptr)
+            mReference = *ptr;
+        else
+            mGlobalScriptDesc = &globalScriptDesc;
+    }
 
     int InterpreterContext::getLocalShort (int index) const
     {
@@ -598,11 +581,6 @@ namespace MWScript
     MWWorld::Ptr InterpreterContext::getReference(bool required)
     {
         return getReferenceImp ("", true, required);
-    }
-
-    std::string InterpreterContext::getTargetId() const
-    {
-        return mTargetId;
     }
 
     void InterpreterContext::updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated)

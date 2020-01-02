@@ -5,6 +5,7 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/cellstate.hpp>
+#include <components/esm/cellref.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 
@@ -267,6 +268,12 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     }
 
     // giving up
+    return Ptr();
+}
+
+MWWorld::Ptr MWWorld::Cells::getPtr (const ESM::RefNum& refNum)
+{
+    //TODO implement
     return Ptr();
 }
 
