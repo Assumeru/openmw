@@ -28,25 +28,6 @@
 
 namespace MWScript
 {
-    MWWorld::Ptr InterpreterContext::getReferenceImp (
-        const std::string& id, bool activeOnly, bool doThrow)
-    {
-        if (!id.empty())
-        {
-            return MWBase::Environment::get().getWorld()->getPtr (id, activeOnly);
-        }
-        else
-        {
-            if (mReference.isEmpty() && mGlobalScriptDesc)
-                mReference = mGlobalScriptDesc->getPtr();
-
-            if (mReference.isEmpty() && doThrow)
-                throw std::runtime_error ("no implicit reference");
-
-            return mReference;
-        }
-    }
-
     const MWWorld::Ptr InterpreterContext::getReferenceImp (
         const std::string& id, bool activeOnly, bool doThrow) const
     {
@@ -136,14 +117,14 @@ namespace MWScript
     : mLocals (locals), mReference (reference)
     {}
 
-    InterpreterContext::InterpreterContext (GlobalScriptDesc& globalScriptDesc)
-    : mLocals (&globalScriptDesc.mLocals)
+    InterpreterContext::InterpreterContext (std::shared_ptr<GlobalScriptDesc> globalScriptDesc)
+    : mLocals (&(globalScriptDesc->mLocals))
     {
-        const MWWorld::Ptr* ptr = globalScriptDesc.getPtrIfPresent();
+        const MWWorld::Ptr* ptr = globalScriptDesc->getPtrIfPresent();
         if (ptr)
             mReference = *ptr;
         else
-            mGlobalScriptDesc = &globalScriptDesc;
+            mGlobalScriptDesc = globalScriptDesc;
     }
 
     int InterpreterContext::getLocalShort (int index) const
@@ -454,12 +435,7 @@ namespace MWScript
     {
         // NOTE: id may be empty, indicating an implicit reference
 
-        MWWorld::Ptr ref2;
-
-        if (id.empty())
-            ref2 = getReferenceImp();
-        else
-            ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false);
+        MWWorld::Ptr ref2 = getReferenceImp(id);
 
         if (ref2.getContainerStore()) // is the object contained?
         {

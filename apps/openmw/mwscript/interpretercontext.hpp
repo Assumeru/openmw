@@ -1,6 +1,8 @@
 #ifndef GAME_SCRIPT_INTERPRETERCONTEXT_H
 #define GAME_SCRIPT_INTERPRETERCONTEXT_H
 
+#include <memory>
+
 #include <components/interpreter/context.hpp>
 
 #include "globalscripts.hpp"
@@ -25,12 +27,7 @@ namespace MWScript
     {
             Locals *mLocals;
             mutable MWWorld::Ptr mReference;
-            GlobalScriptDesc *mGlobalScriptDesc;
-
-            /// If \a id is empty, a reference the script is run from is returned or in case
-            /// of a non-local script the reference derived from the target ID.
-            MWWorld::Ptr getReferenceImp (const std::string& id = "", bool activeOnly = false,
-                bool doThrow=true);
+            std::shared_ptr<GlobalScriptDesc> mGlobalScriptDesc;
 
             /// If \a id is empty, a reference the script is run from is returned or in case
             /// of a non-local script the reference derived from the target ID.
@@ -48,7 +45,7 @@ namespace MWScript
                 char type) const;
 
         public:
-            InterpreterContext (GlobalScriptDesc& globalScriptDesc);
+            InterpreterContext (std::shared_ptr<GlobalScriptDesc> globalScriptDesc);
 
             InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.

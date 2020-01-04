@@ -5,6 +5,8 @@
 
 #include <string>
 #include <map>
+#include <memory>
+#include <utility>
 
 #include <stdint.h>
 
@@ -35,7 +37,7 @@ namespace MWScript
     {
         bool mRunning;
         Locals mLocals;
-        boost::variant<MWWorld::Ptr, ESM::RefNum, std::string> mTarget; // Used to start targeted script
+        boost::variant<MWWorld::Ptr, std::pair<ESM::RefNum, std::string> > mTarget; // Used to start targeted script
 
         GlobalScriptDesc();
 
@@ -47,7 +49,7 @@ namespace MWScript
     class GlobalScripts
     {
             const MWWorld::ESMStore& mStore;
-            std::map<std::string, GlobalScriptDesc> mScripts;
+            std::map<std::string, std::shared_ptr<GlobalScriptDesc> > mScripts;
 
         public:
 
@@ -79,6 +81,9 @@ namespace MWScript
             Locals& getLocals (const std::string& name);
             ///< If the script \a name has not been added as a global script yet, it is added
             /// automatically, but is not set to running state.
+
+            void updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
+            ///< Update the Ptrs stored in mTarget. Should be called after the reference has been moved to a new cell.
     };
 }
 

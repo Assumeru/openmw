@@ -751,9 +751,9 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
-    Ptr World::searchPtrViaRefNum (const ESM::RefNum& refNum)
+    Ptr World::searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum)
     {
-        return mCells.getPtr (refNum);
+        return mCells.getPtr (id, refNum);
     }
 
     struct FindContainerVisitor
@@ -1294,6 +1294,7 @@ namespace MWWorld
                     mRendering->updatePtr(ptr, newPtr);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);

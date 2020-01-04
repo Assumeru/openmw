@@ -42,6 +42,8 @@ namespace MWWorld
 
             Ptr getPtrAndCache (const std::string& name, CellStore& cellStore);
 
+            Ptr getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum);
+
             void writeCell (ESM::ESMWriter& writer, CellStore& cell) const;
 
         public:
@@ -63,7 +65,7 @@ namespace MWWorld
             /// @note name must be lower case
             Ptr getPtr (const std::string& name);
 
-            Ptr getPtr(const ESM::RefNum& refNum);
+            Ptr getPtr(const std::string& id, const ESM::RefNum& refNum);
 
             void rest (double hours);
             void recharge (float duration);

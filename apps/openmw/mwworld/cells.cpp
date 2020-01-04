@@ -271,10 +271,35 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr (const ESM::RefNum& refNum)
+MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& id, const ESM::RefNum& refNum)
 {
-    //TODO implement
+    for (auto& pair : mInteriors)
+    {
+        Ptr ptr = getPtr(pair.second, id, refNum);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+    for (auto& pair : mExteriors)
+    {
+        Ptr ptr = getPtr(pair.second, id, refNum);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
     return Ptr();
+}
+
+MWWorld::Ptr MWWorld::Cells::getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum)
+{
+    if (cellStore.getState() == CellStore::State_Unloaded)
+        cellStore.preload();
+    if (cellStore.getState() == CellStore::State_Preloaded)
+    {
+        if (cellStore.hasId(id))
+            cellStore.load();
+        else
+            return Ptr();
+    }
+    return cellStore.searchViaRefNum(refNum);
 }
 
 void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
