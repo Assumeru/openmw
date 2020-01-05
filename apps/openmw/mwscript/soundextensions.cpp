@@ -39,6 +39,9 @@ namespace MWScript
                     std::string text = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                        return;
+
                     MWBase::Environment::get().getSoundManager()->say (ptr, file);
 
                     if (MWBase::Environment::get().getWindowManager ()->getSubtitlesEnabled())
@@ -54,6 +57,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     runtime.push (MWBase::Environment::get().getSoundManager()->sayDone (ptr));
                 }
@@ -120,7 +129,8 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0,
+                    if (!ptr.isEmpty())
+                        MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0,
                                                                               MWSound::Type::Sfx,
                                                                               mLoop ? MWSound::PlayMode::LoopRemoveAtDistance
                                                                                     : MWSound::PlayMode::Normal);
@@ -149,7 +159,8 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, volume, pitch,
+                    if (!ptr.isEmpty())
+                        MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, volume, pitch,
                                                                               MWSound::Type::Sfx,
                                                                               mLoop ? MWSound::PlayMode::LoopRemoveAtDistance
                                                                                     : MWSound::PlayMode::Normal);
@@ -169,7 +180,8 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->stopSound3D (ptr, sound);
+                    if (!ptr.isEmpty())
+                        MWBase::Environment::get().getSoundManager()->stopSound3D (ptr, sound);
                 }
         };
 
@@ -184,6 +196,12 @@ namespace MWScript
 
                     int index = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
 
                     bool ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying (
                                     ptr, runtime.getStringLiteral (index));

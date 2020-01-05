@@ -59,7 +59,7 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReferenceImp (id, false);
 
-             id = ptr.getClass().getScript (ptr);
+            id = ptr.getClass().getScript (ptr);
 
             ptr.getRefData().setLocals (
                 *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
@@ -480,7 +480,9 @@ namespace MWScript
 
     bool InterpreterContext::isDisabled (const std::string& id) const
     {
-        const MWWorld::Ptr ref = getReferenceImp (id, false);
+        const MWWorld::Ptr ref = getReferenceImp (id, false, false);
+        if(ref.isEmpty())
+            return false;
         return !ref.getRefData().isEnabled();
     }
 

@@ -53,6 +53,8 @@ namespace MWScript
                     // no-op
                     if (count == 0)
                         return;
+                    if (ptr.isEmpty())
+                        return;
 
                     if(::Misc::StringUtils::ciEqual(item, "gold_005")
                             || ::Misc::StringUtils::ciEqual(item, "gold_010")
@@ -107,6 +109,12 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     if(::Misc::StringUtils::ciEqual(item, "gold_005")
                             || ::Misc::StringUtils::ciEqual(item, "gold_010")
                             || ::Misc::StringUtils::ciEqual(item, "gold_025")
@@ -139,6 +147,9 @@ namespace MWScript
 
                     // no-op
                     if (count == 0)
+                        return;
+
+                    if (ptr.isEmpty())
                         return;
 
                     if(::Misc::StringUtils::ciEqual(item, "gold_005")
@@ -194,6 +205,9 @@ namespace MWScript
 
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                        return;
 
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ContainerStoreIterator it = invStore.begin();
@@ -272,6 +286,12 @@ namespace MWScript
                             throw std::runtime_error ("armor index out of range");
                     }
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(-1);
+                        return;
+                    }
+
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (slot);
                     
@@ -305,6 +325,12 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
@@ -331,6 +357,12 @@ namespace MWScript
                     const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     int count = 0;
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(MWWorld::ContainerStore::Type_Miscellaneous);
@@ -351,6 +383,12 @@ namespace MWScript
                 virtual void execute(Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(-1);
+                        return;
+                    }
 
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (MWWorld::InventoryStore::Slot_CarriedRight);

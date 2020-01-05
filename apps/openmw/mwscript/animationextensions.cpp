@@ -27,8 +27,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    MWBase::Environment::get().getMechanicsManager()->skipAnimation (ptr);
+                    if (!ptr.isEmpty())
+                        MWBase::Environment::get().getMechanicsManager()->skipAnimation (ptr);
                }
         };
 
@@ -40,8 +40,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    if (!ptr.getRefData().isEnabled())
+                    if (ptr.isEmpty() || !ptr.getRefData().isEnabled())
                         return;
 
                     std::string group = runtime.getStringLiteral (runtime[0].mInteger);
@@ -70,8 +69,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    if (!ptr.getRefData().isEnabled())
+                    if (ptr.isEmpty() || !ptr.getRefData().isEnabled())
                         return;
 
                     std::string group = runtime.getStringLiteral (runtime[0].mInteger);

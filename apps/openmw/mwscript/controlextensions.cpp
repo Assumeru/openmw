@@ -84,7 +84,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ptr.getClass().getCreatureStats(ptr).setMovementFlag (mFlag, false);
+                    if (!ptr.isEmpty())
+                        ptr.getClass().getCreatureStats(ptr).setMovementFlag (mFlag, false);
                 }
         };
 
@@ -100,8 +101,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    ptr.getClass().getCreatureStats(ptr).setMovementFlag (mFlag, true);
+                    if (!ptr.isEmpty())
+                        ptr.getClass().getCreatureStats(ptr).setMovementFlag (mFlag, true);
                 }
         };
 
@@ -113,6 +114,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
                     runtime.push (stats.getMovementFlag (MWMechanics::CreatureStats::Flag_ForceRun));
@@ -128,6 +135,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
                     runtime.push (stats.getMovementFlag (MWMechanics::CreatureStats::Flag_ForceJump));
                 }
@@ -142,6 +155,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
                     runtime.push (stats.getMovementFlag (MWMechanics::CreatureStats::Flag_ForceMoveJump));
                 }
@@ -155,6 +174,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                     runtime.push (stats.getMovementFlag (MWMechanics::CreatureStats::Flag_ForceSneak));

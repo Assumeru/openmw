@@ -105,7 +105,7 @@ namespace MWScript
 
     MWWorld::Ptr GlobalScriptDesc::getPtr()
     {
-            MWWorld::Ptr ptr = boost::apply_visitor(PtrResolvingVisitor(), mTarget);
+        MWWorld::Ptr ptr = boost::apply_visitor(PtrResolvingVisitor(), mTarget);
         mTarget = ptr;
         return ptr;
     }

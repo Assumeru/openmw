@@ -50,8 +50,8 @@ namespace MWScript
 
                     Interpreter::Type_Float scale = runtime[0].mFloat;
                     runtime.pop();
-
-                    MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
+                    if(!ptr.isEmpty())
+                        MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
         };
 
@@ -63,7 +63,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    runtime.push(ptr.getCellRef().getScale());
+                    if(ptr.isEmpty())
+                        runtime.push(0.f);
+                    else
+                        runtime.push(ptr.getCellRef().getScale());
                 }
         };
 
@@ -80,7 +83,8 @@ namespace MWScript
                     runtime.pop();
 
                     // add the parameter to the object's scale.
-                    MWBase::Environment::get().getWorld()->scaleObject(ptr,ptr.getCellRef().getScale() + scale);
+                    if(!ptr.isEmpty())
+                        MWBase::Environment::get().getWorld()->scaleObject(ptr,ptr.getCellRef().getScale() + scale);
                 }
         };
 
@@ -92,6 +96,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if(ptr.isEmpty())
+                        return;
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -119,6 +125,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if(ptr.isEmpty())
+                    {
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -146,6 +157,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if(ptr.isEmpty())
+                    {
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -173,6 +189,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if(ptr.isEmpty())
+                    {
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -256,6 +277,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if(ptr.isEmpty())
+                    {
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -284,7 +310,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr.getContainerStore())
+                    if (ptr.isEmpty() || ptr.getContainerStore())
                         return;
 
                     if (ptr == MWMechanics::getPlayer())
@@ -396,7 +422,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpPlaceItemCell : public Interpreter::Opcode0
         {
             public:
@@ -450,7 +475,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpPlaceItem : public Interpreter::Opcode0
         {
             public:
@@ -507,6 +531,8 @@ namespace MWScript
                     MWWorld::Ptr actor = pc
                         ? MWMechanics::getPlayer()
                         : R()(runtime);
+                    if (actor.isEmpty())
+                        return;
 
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -546,6 +572,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     const MWWorld::Ptr& ptr = R()(runtime);
+                    if (ptr.isEmpty())
+                        return;
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -579,7 +607,7 @@ namespace MWScript
                     Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    if (!ptr.getRefData().getBaseNode())
+                    if (ptr.isEmpty() || !ptr.getRefData().getBaseNode())
                         return;
 
                     // We can rotate actors only around Z axis
@@ -750,8 +778,8 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);

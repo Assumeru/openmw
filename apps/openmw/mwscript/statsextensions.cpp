@@ -55,6 +55,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     Interpreter::Type_Integer value =
                         ptr.getClass()
                             .getCreatureStats (ptr)
@@ -76,9 +82,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass()
-                        .getCreatureStats (ptr)
-                        .setLevel(value);
+                    if (!ptr.isEmpty())
+                        ptr.getClass()
+                            .getCreatureStats (ptr)
+                            .setLevel(value);
                 }
         };
 
@@ -94,6 +101,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     Interpreter::Type_Integer value =
                         ptr.getClass()
@@ -121,6 +134,9 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                        return;
+
                     MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
                     attribute.setBase (value);
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
@@ -142,6 +158,9 @@ namespace MWScript
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                        return;
 
                     MWMechanics::AttributeValue attribute = ptr.getClass()
                         .getCreatureStats(ptr)
@@ -177,7 +196,9 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
                     Interpreter::Type_Float value;
 
-                    if (mIndex==0 && ptr.getClass().hasItemHealth (ptr))
+                    if (ptr.isEmpty())
+                        value = 0;
+                    else if (mIndex==0 && ptr.getClass().hasItemHealth (ptr))
                     {
                         // health is a special case
                         value = static_cast<Interpreter::Type_Float>(ptr.getClass().getItemMaxHealth(ptr));
@@ -204,6 +225,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                        return;
 
                     Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
@@ -252,6 +276,9 @@ namespace MWScript
                         }
                     }
 
+                    if (ptr.isEmpty())
+                        return;
+
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
 
                     Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
@@ -284,6 +311,9 @@ namespace MWScript
                     Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                        return;
+
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
 
                     Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
@@ -312,6 +342,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (Interpreter::Type_Float(0));
+                        return;
+                    }
+
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
 
                     Interpreter::Type_Float value = 0;
@@ -338,6 +374,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     Interpreter::Type_Integer value = ptr.getClass().getSkill(ptr, mIndex);
 
                     runtime.push (value);
@@ -360,6 +402,9 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                        return;
+
                     MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats (ptr);
 
                     stats.getSkill (mIndex).setBase (value);
@@ -381,6 +426,9 @@ namespace MWScript
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                        return;
 
                     MWMechanics::SkillValue &skill = ptr.getClass()
                         .getNpcStats(ptr)
@@ -458,6 +506,9 @@ namespace MWScript
 
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
+                    if (ptr.isEmpty())
+                        return;
+
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
                     creatureStats.getSpells().add(id);
                     ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
@@ -480,6 +531,9 @@ namespace MWScript
 
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                        return;
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
                     // The spell may have an instant effect which must be handled before the spell's removal.
@@ -516,6 +570,9 @@ namespace MWScript
                     std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                        return;
+
                     ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
                     ptr.getClass().getCreatureStats (ptr).getSpells().removeEffects(spellid);
                 }
@@ -533,6 +590,9 @@ namespace MWScript
                     Interpreter::Type_Integer effectId = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                        return;
+
                     ptr.getClass().getCreatureStats (ptr).getActiveSpells().purgeEffect(effectId);
                 }
         };
@@ -549,6 +609,12 @@ namespace MWScript
 
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     Interpreter::Type_Integer value = 0;
 
@@ -716,7 +782,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    if (ptr.getClass().isNpc())
+                    if (!ptr.isEmpty() && ptr.getClass().isNpc())
                         ptr.getClass().getNpcStats (ptr).setBaseDisposition
                             (ptr.getClass().getNpcStats (ptr).getBaseDisposition() + value);
 
@@ -736,7 +802,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    if (ptr.getClass().isNpc())
+                    if (!ptr.isEmpty() && ptr.getClass().isNpc())
                         ptr.getClass().getNpcStats (ptr).setBaseDisposition (value);
                 }
         };
@@ -750,7 +816,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.getClass().isNpc())
+                    if (ptr.isEmpty() || !ptr.getClass().isNpc())
                         runtime.push(0);
                     else
                         runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
@@ -879,6 +945,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     runtime.push (ptr.getClass().getCreatureStats (ptr).hasCommonDisease());
                 }
         };
@@ -891,6 +963,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     runtime.push (ptr.getClass().getCreatureStats (ptr).hasBlightDisease());
                 }
@@ -908,6 +986,12 @@ namespace MWScript
                     std::string race = runtime.getStringLiteral(runtime[0].mInteger);
                     ::Misc::StringUtils::lowerCaseInPlace(race);
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
                     ::Misc::StringUtils::lowerCaseInPlace(npcRace);
@@ -1021,6 +1105,9 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                        return;
+
                     std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
                     if(factionID.empty())
                         return;
@@ -1055,6 +1142,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                        return;
 
                     std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
                     if(factionID.empty())
@@ -1093,6 +1183,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     Interpreter::Type_Integer value =
                         ptr.getClass().getCreatureStats (ptr).hasDied();
 
@@ -1111,6 +1207,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     Interpreter::Type_Integer value =
                         ptr.getClass().getCreatureStats (ptr).hasBeenMurdered();
@@ -1131,6 +1233,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     Interpreter::Type_Integer value =
                         ptr.getClass().getCreatureStats (ptr).getKnockedDownOneFrame();
 
@@ -1146,7 +1254,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    runtime.push(ptr.getClass().getNpcStats(ptr).isWerewolf());
+                    if (ptr.isEmpty())
+                        runtime.push (0);
+                    else
+                        runtime.push(ptr.getClass().getNpcStats(ptr).isWerewolf());
                 }
         };
 
@@ -1158,7 +1269,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
+                    if(!ptr.isEmpty())
+                        MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
                 }
         };
 
@@ -1170,7 +1282,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(ptr);
+                    if(!ptr.isEmpty())
+                        MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(ptr);
                 }
         };
 
@@ -1189,7 +1302,7 @@ namespace MWScript
                         if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Ended)
                             MWBase::Environment::get().getStateManager()->resumeGame();
                     }
-                    else if (ptr.getClass().getCreatureStats(ptr).isDead())
+                    else if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead())
                     {
                         bool wasEnabled = ptr.getRefData().isEnabled();
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
@@ -1233,6 +1346,12 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
+                if (ptr.isEmpty())
+                {
+                    runtime.push(0);
+                    return;
+                }
+
                 const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                 float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
@@ -1267,6 +1386,8 @@ namespace MWScript
             virtual void execute(Interpreter::Runtime &runtime)
             {
                 MWWorld::Ptr ptr = R()(runtime);
+                if(ptr.isEmpty())
+                    return;
                 MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                 float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
@@ -1302,6 +1423,8 @@ namespace MWScript
             virtual void execute(Interpreter::Runtime &runtime)
             {
                 MWWorld::Ptr ptr = R()(runtime);
+                if(ptr.isEmpty())
+                    return;
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
                 int arg = runtime[0].mInteger;

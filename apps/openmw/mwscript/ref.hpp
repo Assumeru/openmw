@@ -24,7 +24,7 @@ namespace MWScript
     {
         static const bool implicit = true;
 
-        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required = true,
+        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required = false,
             bool activeOnly = false) const;
     };
 }

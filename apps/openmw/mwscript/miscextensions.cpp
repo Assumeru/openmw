@@ -141,7 +141,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (ptr.getRefData().onActivate());
+                    if (!ptr.isEmpty())
+                        runtime.push (ptr.getRefData().onActivate());
                 }
         };
 
@@ -157,7 +158,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr.getRefData().activateByScript())
+                    if (!ptr.isEmpty() && ptr.getRefData().activateByScript())
                         context.executeActivation(ptr, MWMechanics::getPlayer());
                 }
         };
@@ -170,6 +171,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                        return;
 
                     Interpreter::Type_Integer lockLevel = ptr.getCellRef().getLockLevel();
                     if(lockLevel==0) { //no lock level was ever set, set to 100 as default
@@ -201,8 +205,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    ptr.getCellRef().unlock ();
+                    if (!ptr.isEmpty())
+                        ptr.getCellRef().unlock ();
                 }
         };
 
@@ -410,6 +414,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     runtime.push (ptr.getCellRef().getLockLevel() > 0);
                 }
         };
@@ -426,7 +436,7 @@ namespace MWScript
                     std::string effect = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    if (!ptr.getClass().isActor())
+                    if (ptr.isEmpty() || !ptr.getClass().isActor())
                     {
                         runtime.push(0);
                         return;
@@ -474,7 +484,7 @@ namespace MWScript
                     std::string gem = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if (!ptr.getClass().hasInventoryStore(ptr))
+                    if (ptr.isEmpty() || !ptr.getClass().hasInventoryStore(ptr))
                         return;
 
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -507,7 +517,7 @@ namespace MWScript
                     for (unsigned int i=0; i<arg0; ++i)
                         runtime.pop();
 
-                    if (!ptr.getClass().hasInventoryStore(ptr))
+                    if (ptr.isEmpty() || !ptr.getClass().hasInventoryStore(ptr))
                         return;
 
                     MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
@@ -545,7 +555,7 @@ namespace MWScript
                     if (amount == 0)
                         return;
 
-                    if (!ptr.getClass().isActor())
+                    if (ptr.isEmpty() || !ptr.getClass().isActor())
                         return;
 
                     if (ptr.getClass().hasInventoryStore(ptr))
@@ -622,7 +632,7 @@ namespace MWScript
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if (!ptr.getClass().hasInventoryStore(ptr))
+                    if (ptr.isEmpty() || !ptr.getClass().hasInventoryStore(ptr))
                         return;
 
                     MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
@@ -648,6 +658,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     runtime.push(ptr.getClass().getCreatureStats (ptr).getAttacked ());
                 }
         };
@@ -660,6 +676,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
 
                     runtime.push((ptr.getClass().hasInventoryStore(ptr) || ptr.getClass().isBipedal(ptr)) &&
                                 ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
@@ -674,6 +696,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
 
                     runtime.push(ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Spell);
                 }
@@ -690,7 +718,7 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    if (!ptr.getClass().isActor())
+                    if (ptr.isEmpty() || !ptr.getClass().isActor())
                     {
                         runtime.push(0);
                         return;
@@ -723,9 +751,11 @@ namespace MWScript
                     runtime.pop();
 
                     if (parameter == 1)
-                        MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                        if(!ptr.isEmpty())
+                            MWBase::Environment::get().getWorld()->deleteObject(ptr);
                     else if (parameter == 0)
-                        MWBase::Environment::get().getWorld()->undeleteObject(ptr);
+                        if(!ptr.isEmpty())
+                            MWBase::Environment::get().getWorld()->undeleteObject(ptr);
                     else
                         throw std::runtime_error("SetDelete: unexpected parameter");
                 }
@@ -762,6 +792,13 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     runtime.push (MWBase::Environment::get().getWorld()->getPlayerStandingOn(ptr));
                 }
         };
@@ -774,6 +811,13 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     runtime.push (MWBase::Environment::get().getWorld()->getActorStandingOn(ptr));
                 }
         };
@@ -786,6 +830,13 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     runtime.push (MWBase::Environment::get().getWorld()->getPlayerCollidingWith(ptr));
                 }
         };
@@ -798,6 +849,13 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     runtime.push (MWBase::Environment::get().getWorld()->getActorCollidingWith(ptr));
                 }
         };
@@ -813,7 +871,8 @@ namespace MWScript
                     float healthDiffPerSecond = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->hurtStandingActors(ptr, healthDiffPerSecond);
+                    if (!ptr.isEmpty())
+                        MWBase::Environment::get().getWorld()->hurtStandingActors(ptr, healthDiffPerSecond);
                 }
         };
 
@@ -828,7 +887,8 @@ namespace MWScript
                     float healthDiffPerSecond = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->hurtCollidingActors(ptr, healthDiffPerSecond);
+                    if (!ptr.isEmpty())
+                        MWBase::Environment::get().getWorld()->hurtCollidingActors(ptr, healthDiffPerSecond);
                 }
         };
 
@@ -854,6 +914,12 @@ namespace MWScript
                     std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
                     runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitObject()));
 
@@ -872,6 +938,12 @@ namespace MWScript
 
                     std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
 
                     MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
                     runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject()));
@@ -1099,6 +1171,12 @@ namespace MWScript
                 std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
                 runtime.pop();
 
+                if (ptr.isEmpty())
+                {
+                    runtime.getContext().report("spellcasting failed: missing caster.");
+                    return;
+                }
+
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
                 if (!spell)
                 {
@@ -1151,6 +1229,9 @@ namespace MWScript
 
                 std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
+
+                if (ptr.isEmpty())
+                    return;
 
                 MWMechanics::CastSpell cast(ptr, ptr, false, true);
                 cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
@@ -1218,7 +1299,7 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime &runtime, unsigned int arg0)
             {
-                MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr = R()(runtime, true);
 
                 std::stringstream msg;
 

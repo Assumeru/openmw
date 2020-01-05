@@ -131,7 +131,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.getRefData().isEnabled())
+                    if (ptr.isEmpty() || !ptr.getRefData().isEnabled())
                         return;
 
                     if (!ptr.getClass().isActor())
@@ -167,7 +167,8 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getNpcStats (ptr).setReputation (ptr.getClass().getNpcStats (ptr).getReputation () + value);
+                    if (!ptr.isEmpty())
+                        ptr.getClass().getNpcStats (ptr).setReputation (ptr.getClass().getNpcStats (ptr).getReputation () + value);
                 }
         };
 
@@ -182,7 +183,8 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getNpcStats (ptr).setReputation (value);
+                    if (!ptr.isEmpty())
+                        ptr.getClass().getNpcStats (ptr).setReputation (value);
                 }
         };
 
@@ -194,6 +196,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     runtime.push (ptr.getClass().getNpcStats (ptr).getReputation ());
                 }
@@ -207,6 +215,12 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (ptr.isEmpty())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
@@ -276,8 +290,8 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 MWWorld::Ptr ptr = R()(runtime);
-
-                MWBase::Environment::get().getDialogueManager()->clearInfoActor(ptr);
+                if (!ptr.isEmpty())
+                    MWBase::Environment::get().getDialogueManager()->clearInfoActor(ptr);
             }
         };
 
