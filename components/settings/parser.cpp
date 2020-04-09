@@ -3,10 +3,9 @@
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/stringops.hpp>
 
 #include <boost/filesystem/fstream.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings)
 {
@@ -36,7 +35,7 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
                 fail("unterminated category");
 
             currentCategory = line.substr(i+1, end - (i+1));
-            boost::algorithm::trim(currentCategory);
+            Misc::StringUtils::trim(currentCategory);
             i = end+1;
         }
 
@@ -51,11 +50,11 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
             fail("unterminated setting name");
 
         std::string setting = line.substr(i, (settingEnd-i));
-        boost::algorithm::trim(setting);
+        Misc::StringUtils::trim(setting);
 
         size_t valueBegin = settingEnd+1;
         std::string value = line.substr(valueBegin);
-        boost::algorithm::trim(value);
+        Misc::StringUtils::trim(value);
 
         if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
             fail(std::string("duplicate setting: [" + currentCategory + "] " + setting));
@@ -77,6 +76,9 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
 
     // Were there any lines at all in the file?
     bool existing = false;
+
+    // Is an entirely blank line queued to be added?
+    bool emptyLineQueued = false;
 
     // The category/section we're currently in.
     std::string currentCategory;
@@ -101,12 +103,22 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
         // The current character position in the line.
         size_t i = 0;
 
-        // Don't add additional newlines at the end of the file.
+        // An empty line was queued.
+        if (emptyLineQueued)
+        {
+            emptyLineQueued = false;
+            // We're still going through the current category, so we should copy it.
+            if (currentCategory.empty() || istream.eof() || line[i] != '[')
+                ostream << std::endl;
+        }
+
+        // Don't add additional newlines at the end of the file otherwise.
         if (istream.eof()) continue;
 
-        // Copy entirely blank lines.
-        if (!skipWhiteSpace(i, line)) {
-            ostream << line << std::endl;
+        // Queue entirely blank lines to add them if desired.
+        if (!skipWhiteSpace(i, line))
+        {
+            emptyLineQueued = true;
             continue;
         }
 
@@ -129,20 +141,27 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
                 continue;
             }
 
-            // Ensure that all options in the current category have been written.
-            for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit) {
-                if (mit->second == false && mit->first.first == currentCategory) {
-                    Log(Debug::Verbose) << "Added new setting: [" << currentCategory << "] "
-                            << mit->first.second << " = " << settings.at(mit->first);
-                    ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
-                    mit->second = true;
-                    changed = true;
+            if (!currentCategory.empty())
+            {
+                // Ensure that all options in the current category have been written.
+                for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit)
+                {
+                    if (mit->second == false && mit->first.first == currentCategory)
+                    {
+                        Log(Debug::Verbose) << "Added new setting: [" << currentCategory << "] "
+                                << mit->first.second << " = " << settings.at(mit->first);
+                        ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
+                        mit->second = true;
+                        changed = true;
+                    }
                 }
+                // Add an empty line after the last option in a category.
+                ostream << std::endl;
             }
 
             // Update the current category.
             currentCategory = line.substr(i+1, end - (i+1));
-            boost::algorithm::trim(currentCategory);
+            Misc::StringUtils::trim(currentCategory);
 
             // Write the (new) current category to the file.
             ostream << "[" << currentCategory << "]" << std::endl;
@@ -176,12 +195,12 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
             continue;
         }
         std::string setting = line.substr(i, (settingEnd-i));
-        boost::algorithm::trim(setting);
+        Misc::StringUtils::trim(setting);
 
         // Get the existing value so we can see if we've changed it.
         size_t valueBegin = settingEnd+1;
         std::string value = line.substr(valueBegin);
-        boost::algorithm::trim(value);
+        Misc::StringUtils::trim(value);
 
         // Construct the setting map key to determine whether the setting has already been
         // written to the file.

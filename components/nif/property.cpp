@@ -14,7 +14,7 @@ void Property::read(NIFStream *nif)
 
 void NiTexturingProperty::Texture::read(NIFStream *nif)
 {
-    inUse = !!nif->getInt();
+    inUse = nif->getBoolean();
     if(!inUse) return;
 
     texture.read(nif);
@@ -46,12 +46,10 @@ void NiTexturingProperty::read(NIFStream *nif)
     for (unsigned int i = 0; i < numTextures; i++)
     {
         textures[i].read(nif);
-        // Ignore these at the moment
         if (i == 5 && textures[5].inUse) // Bump map settings
         {
-            /*float lumaScale =*/ nif->getFloat();
-            /*float lumaOffset =*/ nif->getFloat();
-            /*const Vector4 *lumaMatrix =*/ nif->getVector4();
+            envMapLumaBias = nif->getVector2();
+            bumpMapMatrix = nif->getVector4();
         }
     }
 }
