@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
 
 0.46.0
 ------
