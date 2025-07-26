@@ -9,6 +9,7 @@ env:
 
 jobs:
   Ubuntu:
+    if: false
     runs-on: ubuntu-latest
 
     steps:
@@ -67,6 +68,7 @@ jobs:
     #     name: build_artifact.7z
 
   MacOS:
+    if: false
     runs-on: macos-latest
 
     steps:
@@ -87,6 +89,7 @@ jobs:
       run: CI/macos/build.sh
 
   Output-Envs:
+    if: false
     name: Read .env file and expose it as output
     runs-on: ubuntu-latest
     outputs:
@@ -111,3 +114,35 @@ jobs:
       image: ${{ matrix.image }}
       vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
       build-type: ${{ needs.Output-Envs.outputs.BUILD_TYPE }}
+
+  GenericLinux:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+      env:
+        PKG_CONFIG_PATH: "/usr/local/lib64/pkgconfig:/usr/local/share/pkgconfig/:/usr/local/lib/pkgconfig/:/usr/lib/pkgconfig"
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add OpenMW PPA Dependencies
+      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
+
+    - name: Install Building Dependencies
+      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+
+    - name: Configure
+      run: >
+        cmake .
+        -D CMAKE_BUILD_TYPE=Release
+        -D BUILD_TGZ=ON
+        -D BUILD_TGZ_RELEASE=ON
+        -D CPACK_STRIP_FILES=ON
+        -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
+        -D DEPLOY_QT_TRANSLATIONS=ON
+
+    - name: Build
+      run: cmake --build . -- -j$(nproc)
+
+    - name: Package
+      run: make package
