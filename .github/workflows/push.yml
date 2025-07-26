@@ -127,8 +127,8 @@ jobs:
 
     - name: Add OpenMW PPA Dependencies
       run: |
-        apt-get update
-        apt-get install software-properties-common
+        apt update
+        apt-get install -y software-properties-common
         add-apt-repository ppa:openmw/openmw
         apt-get update
 
