@@ -126,10 +126,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Add OpenMW PPA Dependencies
-      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
+      run: add-apt-repository ppa:openmw/openmw; apt-get update
 
     - name: Install Building Dependencies
-      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+      run: CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
     - name: Configure
       run: >
