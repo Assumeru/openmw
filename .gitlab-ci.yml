@@ -514,6 +514,25 @@ Ubuntu_GCC_integration_tests_asan:
     OPENMW_DEPS: openmw-integration-tests libasan6
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=0
 
+Debian_Generic_binaries:
+  stage: checks
+  tags:
+    - saas-linux-medium-amd64
+  image: debian:bookworm
+  before_script:
+    CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+  script:
+    - export "PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:/usr/local/share/pkgconfig/:/usr/local/lib/pkgconfig/:/usr/lib/pkgconfig"
+    - cmake .
+      -D CMAKE_BUILD_TYPE=Release
+      -D BUILD_TGZ=ON
+      -D BUILD_TGZ_RELEASE=ON
+      -D CPACK_STRIP_FILES=ON
+      -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
+      -D DEPLOY_QT_TRANSLATIONS=ON
+    - cmake --build . -- -j$(nproc)
+    - make package
+
 .MacOS:
   stage: build
   rules:
